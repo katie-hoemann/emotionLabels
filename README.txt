@@ -1,7 +1,7 @@
 STEP 1_ESTIMATE VALENCE_PYTHON
 > INPUT subfolder: files with cleaned experience sampling prompt data from Studies 1 and 2
 > OUTPUT subfolder: prompt data for Studies 1 and 2 with estimated (inferred) valence
-> SCRIPTS subfolder:
+> SCRIPTS subfolder: contains the Jupyter notebook with the python code needed for inferring valence for arbitrary phrases. Run via `$ jupyter lab` in the terminal.
 
 STEP 2_COUNT EMOTION WORDS_PYTHON
 > INPUT subfolder: <see Step 1 output>
