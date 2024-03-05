@@ -62,6 +62,8 @@ for i_participant = 1:length(participantIDlist)
     numUnique(i_participant,:) = numUniquePos(i_participant,:)+numUniqueNeg(i_participant,:); % number of unique words used across all prompts
     
     wordsPerPrompt(i_participant,:) = totalWords(i_participant,:)/totalPrompts(i_participant,:); % mean emotion words per prompt
+    wordsPerPromptPos(i_participant,:) = totalPos(i_participant,:)/totalPrompts(i_participant,:); % mean positive emotion words per prompt
+    wordsPerPromptNeg(i_participant,:) = totalNeg(i_participant,:)/totalPrompts(i_participant,:); % mean negative emotion words per prompt
     meanEstValence(i_participant,:) = mean(estValence); % mean estimated valence from words
     meanPropPos(i_participant,:) = totalPos(i_participant,:)/totalWords(i_participant,:); % mean proportion positive words
     propUniquePos(i_participant,:) = numUniquePos(i_participant,:)/totalPos(i_participant,:); % ratio of all positive words that were unique
@@ -197,9 +199,9 @@ if print == 1
 end
 
 %% run between-persons correlations with emotional function (derived and self-reported)
-toCorrelate_emo = [wordsPerPrompt propUnique emoDiv emoGran TAS20 RDEES]; 
+toCorrelate_emo = [wordsPerPrompt wordsPerPromptNeg wordsPerPromptPos propUnique propUniqueNeg propUniquePos TAS20 RDEES emoDiv emoGran granNeg granPos]; 
 [r_emo,p_emo] = corr(toCorrelate_emo,'rows','complete');
-names_emo = {'wPP','pU','emoDiv','emoGran','TAS20','RDEES'};
+names_emo = {'wPP','wPPn','wPPp','pU','pUn','pUp','TAS20','RDEES','emoDiv','emoGran','granNeg','granPos'};
 r_table_emo = array2table(r_emo,'RowNames',names_emo,'VariableNames',names_emo);
 p_table_emo = array2table(p_emo,'RowNames',names_emo,'VariableNames',names_emo);
 if print == 1
