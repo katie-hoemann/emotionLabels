@@ -79,6 +79,8 @@ for i_participant = 1:length(participantIDlist)
     participantData_rating(participantData_rating > 6) = NaN; % remove invalid values
     missingData = any(isnan(participantData_rating),2); % identify missing data
     participantData_rating = participantData_rating(~missingData,:); % remove missing data
+    participantData_rating_neg = participantData_rating(:,(labels(:,1)==0)); % negative emotions
+    participantData_rating_pos = participantData_rating(:,(labels(:,1)==1)); % positive emotions
 
     % emodiversity
     numEmotions = length(wordList);
@@ -91,10 +93,34 @@ for i_participant = 1:length(participantIDlist)
         weightedCount(i_emotion) = countEmotionRanked(i_emotion)*index(i_emotion); % weight the count of each emotion by its ranking
     end
     emoDiv(i_participant,:) = 1-(((2*sum(weightedCount))/(numEmotions*sum(countEmotionRanked)))-((numEmotions+1)/numEmotions)); % calculate Gini coefficient following Benson et al (2018)
-     
+    
+    % negative emodiversity
+    numNegEmotions = sum(labels(:,1)==0);
+    for i_emotion = 1:numNegEmotions
+        countNegEmotionRanked(i_emotion) = sum(participantData_rating_neg(:,i_emotion)>0); 
+    end
+    countNegEmotionRanked = sort(countNegEmotionRanked); 
+    indexNeg = 1:1:numNegEmotions;
+    for i_emotion = 1:numNegEmotions
+        weightedCountNeg(i_emotion) = countNegEmotionRanked(i_emotion)*indexNeg(i_emotion);
+    end
+    emoDivNeg(i_participant,:) = 1-(((2*sum(weightedCountNeg))/(numNegEmotions*sum(countNegEmotionRanked)))-((numNegEmotions+1)/numNegEmotions)); 
+    
+    % positive emodiversity
+    numPosEmotions = sum(labels(:,1)==1);
+    for i_emotion = 1:numPosEmotions
+        countPosEmotionRanked(i_emotion) = sum(participantData_rating_pos(:,i_emotion)>0); 
+    end
+    countPosEmotionRanked = sort(countPosEmotionRanked); 
+    indexPos = 1:1:numPosEmotions;
+    for i_emotion = 1:numPosEmotions
+        weightedCountPos(i_emotion) = countPosEmotionRanked(i_emotion)*indexPos(i_emotion); 
+    end
+    emoDivPos(i_participant,:) = 1-(((2*sum(weightedCountPos))/(numPosEmotions*sum(countPosEmotionRanked)))-((numPosEmotions+1)/numPosEmotions)); 
+    
     % participant-level emotional granularity
-    rawICC(i_participant,1) = ICC(participantData_rating(:,(labels(:,1)==0)),typeICC); % negative valence ICC
-    rawICC(i_participant,2) = ICC(participantData_rating(:,(labels(:,1)==1)),typeICC); % positive valence ICC
+    rawICC(i_participant,1) = ICC(participantData_rating_neg,typeICC); % negative valence ICC
+    rawICC(i_participant,2) = ICC(participantData_rating_pos,typeICC); % positive valence ICC
     rawICC(i_participant,3) = (rawICC(i_participant,1)+rawICC(i_participant,2))/2; % mean ICC
     rawICC(rawICC<0) = 0; % recode negative values as 0
     rtoZ(i_participant,1) = 0.5*log((1+rawICC(i_participant,1))/(1-rawICC(i_participant,1))); % Fisher-transform ICCs
@@ -199,9 +225,9 @@ if print == 1
 end
 
 %% run between-persons correlations with emotional function (derived and self-reported)
-toCorrelate_emo = [wordsPerPrompt wordsPerPromptNeg wordsPerPromptPos propUnique propUniqueNeg propUniquePos TAS20 RDEES emoDiv emoGran granNeg granPos]; 
+toCorrelate_emo = [wordsPerPrompt wordsPerPromptNeg wordsPerPromptPos propUnique propUniqueNeg propUniquePos TAS20 RDEES emoDiv emoDivNeg emoDivPos emoGran granNeg granPos]; 
 [r_emo,p_emo] = corr(toCorrelate_emo,'rows','complete');
-names_emo = {'wPP','wPPn','wPPp','pU','pUn','pUp','TAS20','RDEES','emoDiv','emoGran','granNeg','granPos'};
+names_emo = {'wPP','wPPn','wPPp','pU','pUn','pUp','TAS20','RDEES','emoDiv','negDiv','posDiv','emoGran','granNeg','granPos'};
 r_table_emo = array2table(r_emo,'RowNames',names_emo,'VariableNames',names_emo);
 p_table_emo = array2table(p_emo,'RowNames',names_emo,'VariableNames',names_emo);
 if print == 1
