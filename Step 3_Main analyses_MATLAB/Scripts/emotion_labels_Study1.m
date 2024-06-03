@@ -15,7 +15,7 @@ promptData.data(noEmotionWords,:) = []; % drop prompts where no emotion words we
 %% import daily diary data
 diaryData = importdata('Study1_DiaryData_EmotionRatings.xlsx');
 words = readtable('Study1_DiaryData_RatedWords.csv'); 
-wordList = diaryData.colheaders(5:22)';  % grab sampled words from top row of data file
+wordList = diaryData.colheaders(4:end)';  % grab sampled words from top row of data file
 % set valence and arousal categories for sampled words
 for i_word = 1:height(words) % define valence categories
 if words.Valence(i_word) > 5 % derived based on the database mean for Warriner et al (2013)
@@ -75,7 +75,7 @@ for i_participant = 1:length(participantIDlist)
     meanRepValence(i_participant,:) = mean(repValence); % mean valence from ratings
     
     % emotion rating-based variables
-    participantData_rating = diaryData.data(find(diaryData.data(:,1)==participantID),4:21); % get all rating data for that participant
+    participantData_rating = diaryData.data(find(diaryData.data(:,1)==participantID),4:end); % get all rating data for that participant
     participantData_rating(participantData_rating > 6) = NaN; % remove invalid values
     missingData = any(isnan(participantData_rating),2); % identify missing data
     participantData_rating = participantData_rating(~missingData,:); % remove missing data
@@ -225,14 +225,34 @@ if print == 1
 end
 
 %% run between-persons correlations with emotional function (derived and self-reported)
-toCorrelate_emo = [wordsPerPrompt wordsPerPromptNeg wordsPerPromptPos propUnique propUniqueNeg propUniquePos TAS20 RDEES emoDiv emoDivNeg emoDivPos emoGran granNeg granPos]; 
+toCorrelate_emo = [wordsPerPrompt propUnique TAS20 RDEES emoDiv emoGran]; 
 [r_emo,p_emo] = corr(toCorrelate_emo,'rows','complete');
-names_emo = {'wPP','wPPn','wPPp','pU','pUn','pUp','TAS20','RDEES','emoDiv','negDiv','posDiv','emoGran','granNeg','granPos'};
+names_emo = {'wPP','pU','TAS20','RDEES','emoDiv','emoGran'};
 r_table_emo = array2table(r_emo,'RowNames',names_emo,'VariableNames',names_emo);
 p_table_emo = array2table(p_emo,'RowNames',names_emo,'VariableNames',names_emo);
 if print == 1
     writetable(r_table_emo,'r_table_Study1_emoFxn.xlsx');
     writetable(p_table_emo,'p_table_Study1_emoFxn.xlsx');
+end
+
+toCorrelate_emo_neg = [wordsPerPromptNeg propUniqueNeg emoDivNeg granNeg]; 
+[r_emo_neg,p_emo_neg] = corr(toCorrelate_emo_neg,'rows','complete');
+names_emo_neg = {'wPPn','pUn','divNeg','granNeg'};
+r_table_emo_neg = array2table(r_emo_neg,'RowNames',names_emo_neg,'VariableNames',names_emo_neg);
+p_table_emo_neg = array2table(p_emo_neg,'RowNames',names_emo_neg,'VariableNames',names_emo_neg);
+if print == 1
+    writetable(r_table_emo,'r_table_Study1_emoFxn_neg.xlsx');
+    writetable(p_table_emo,'p_table_Study1_emoFxn_neg.xlsx');
+end
+
+toCorrelate_emo_pos = [wordsPerPromptPos propUniquePos emoDivPos granPos]; 
+[r_emo_pos,p_emo_pos] = corr(toCorrelate_emo_pos,'rows','complete');
+names_emo_pos = {'wPPp','pUp','divPos','granPos'};
+r_table_emo_pos = array2table(r_emo_pos,'RowNames',names_emo_pos,'VariableNames',names_emo_pos);
+p_table_emo_pos = array2table(p_emo_pos,'RowNames',names_emo_pos,'VariableNames',names_emo_pos);
+if print == 1
+    writetable(r_table_emo,'r_table_Study1_emoFxn_pos.xlsx');
+    writetable(p_table_emo,'p_table_Study1_emoFxn_pos.xlsx');
 end
 
 %% generate figures
